@@ -14,6 +14,9 @@ var bodyParser   = require('body-parser');
 var session      = require('express-session');
 var RedisStore = require('connect-redis')(session);
 
+var redisHost = '127.0.0.1';
+var redisPort = 6379;
+
 
 require('./config/passport')(passport); // pass passport for configuration
 
