@@ -47,10 +47,18 @@ app.use(session({
     store: sessionStore
 }));
 
+app.get('/', function(req, res) {
+    console.log("New session with userName: " + req.session.user + " sessionid: " + req.sessionID + " and jsessionid: " + req.cookies['jsessionid']);
+    res.render('index.ejs'); // load the index.ejs file
+});
+
+
 
 app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
 app.use(flash()); // use connect-flash for flash messages stored in session
+
+
 
 // routes ======================================================================
 require('./app/routes.js')(app, passport); // load our routes and pass in our app and fully configured passport

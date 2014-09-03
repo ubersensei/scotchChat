@@ -5,7 +5,6 @@ module.exports = function(app, passport) {
     // HOME PAGE (with login links) ========
     // =====================================
     app.get('/', function(req, res) {
-        console.log("New session with userName: " + req.session.user + " sessionid: " + req.sessionID + " and jsessionid: " + req.cookies['jsessionid']);
         res.render('index.ejs'); // load the index.ejs file
     });
 
@@ -14,17 +13,34 @@ module.exports = function(app, passport) {
     // =====================================
     // show the login form
     app.get('/login', function(req, res) {
-
         // render the page and pass in any flash data if it exists
         res.render('login.ejs', { message: req.flash('loginMessage') });
     });
 
+
+    app.post('/login', function(req, res, next) {
+        passport.authenticate('local-login', function(err, user, info) {
+            if (err) { return next(err) }
+            if (!user) {
+                req.flash('error', info.message);
+                return res.redirect('/login')
+            }
+            req.logIn(user, function(err) {
+                if (err) { return next(err); }
+                // upon successful login, start socket.io
+                return res.redirect('/profile'); // can send js payload too
+            });
+        })(req, res, next);
+    });
+
+
+
     // process the login form
-    app.post('/login', passport.authenticate('local-login', {
-        successRedirect : '/profile', // redirect to the secure profile section
-        failureRedirect : '/login', // redirect back to the signup page if there is an error
-        failureFlash : true // allow flash messages
-    }));
+//    app.post('/login', passport.authenticate('local-login', {
+//        successRedirect : '/profile', // redirect to the secure profile section
+//        failureRedirect : '/login', // redirect back to the signup page if there is an error
+//        failureFlash : true // allow flash messages
+//    }));
 
     // =====================================
     // SIGNUP ==============================
