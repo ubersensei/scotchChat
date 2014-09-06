@@ -18,6 +18,10 @@ module.exports = function(app, passport) {
     });
 
 
+    /**
+     * Upon successful login, start socket.io
+     */
+
     app.post('/login', function(req, res, next) {
         passport.authenticate('local-login', function(err, user, info) {
             if (err) { return next(err) }
@@ -52,12 +56,39 @@ module.exports = function(app, passport) {
         res.render('signup.ejs', { message: req.flash('signupMessage') });
     });
 
-    // process the signup form
-    app.post('/signup', passport.authenticate('local-signup', {
-        successRedirect : '/profile', // redirect to the secure profile section
-        failureRedirect : '/signup', // redirect back to the signup page if there is an error
-        failureFlash : true // allow flash messages
-    }));
+
+
+    /**
+     * Upon successful signup, start socket.io
+     */
+
+    app.post('/signup', function(req, res, next) {
+        passport.authenticate('local-signup', function(err, user, info) {
+            if (err) { return next(err) }
+            if (!user) {
+                req.flash('error', info.message);
+                return res.redirect('/login')
+            }
+            req.logIn(user, function(err) {
+                if (err) { return next(err); }
+                // upon successful login, start socket.io
+                return res.redirect('/profile'); // can send js payload too
+            });
+        })(req, res, next);
+    });
+
+
+//
+//
+//
+//    // process the signup form
+//    app.post('/signup', passport.authenticate('local-signup', {
+//        successRedirect : '/profile', // redirect to the secure profile section
+//        failureRedirect : '/signup', // redirect back to the signup page if there is an error
+//        failureFlash : true // allow flash messages
+//    }));
+
+
 
     // =====================================
     // PROFILE SECTION =====================

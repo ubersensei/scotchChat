@@ -1,0 +1,2 @@
+Test whether the jsessionid is being set - may need to take care of the ordering of the middlewares
+check upon userlogout, does the jessionid still remain valid ? Also, need to test load balancing with round-robin
