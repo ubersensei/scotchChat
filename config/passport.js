@@ -8,13 +8,78 @@ var configAuth = require('./auth');
 
 var bcrypt   = require('bcrypt-nodejs');
 var mysql = require('mysql');
-var connection = mysql.createConnection({
-    host     : 'localhost',
-    user     : 'root',
-    password : 'tangent90'
+var async = require('async');
+
+
+var env = process.env.NODE_ENV || 'development';
+if ('development' == env) {
+//    app.use(express.static(path.join(__dirname, 'public')));
+    var client = mysql.createConnection({
+        host     : 'localhost',
+        user     : 'root',
+        password : 'tangent90'
+    });
+}
+else {
+    var client = mysql.createConnection({
+                host: process.env.RDS_HOSTNAME,
+                user: process.env.RDS_USERNAME,
+                password: process.env.RDS_PASSWORD,
+                port: process.env.RDS_PORT
+    });
+}
+
+
+async.series([
+    function connect(callback) {
+        client.connect(callback);
+    },
+    function clear(callback) {
+        client.query('DROP DATABASE IF EXISTS rum', callback);
+    },
+    function create_db(callback) {
+        client.query('CREATE DATABASE rum', callback);
+    },
+    function use_db(callback) {
+        client.query('USE rum', callback);
+    },
+    function create_table(callback) {
+
+        client.query('CREATE TABLE IF NOT EXISTS `users` (' +
+            '`id` MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,' +
+            '`email` VARCHAR(150) DEFAULT NULL,' +
+            '`password` VARCHAR(140) DEFAULT NULL,' +
+            '`fb_id` VARCHAR(140) DEFAULT NULL,' +
+            '`fb_token` VARCHAR(340) DEFAULT NULL,' +
+            '`fb_name` VARCHAR(140) DEFAULT NULL,' +
+            '`fb_email` VARCHAR(140) DEFAULT NULL,' +
+            'PRIMARY KEY(ID))', callback);
+
+//        client.query('CREATE TABLE PEOPLE (' +
+//            'ID VARCHAR(40), ' +
+//            'EMAIL VARCHAR(140), ' +
+//            'PASSWORD VARCHAR(140), ' +
+//            'PRIMARY KEY(ID))', callback);
+    },
+    function insert_default(callback) {
+        var person = {
+            EMAIL: 'neophyte-1234@gmail.com',
+            PASSWORD: 'neo'};
+        client.query('INSERT INTO users set ?', person, callback);
+    }
+], function (err, results) {
+    if (err) {
+        console.log('Exception initializing database.');
+        throw err;
+    } else {
+        console.log('Database initialization complete.');
+        //        init();
+    }
 });
 
-connection.query('USE scotch'); // scotch is the name of the database
+
+
+//client.query('USE scotch'); // scotch is the name of the database
 
 
 // define the function directly
@@ -33,7 +98,7 @@ module.exports = function(passport) {
 
 
     function mysql_findById(id, fn) {
-        connection.query("select * from users where users.id = ?", id, function(err,rows){
+        client.query("select * from users where users.id = ?", id, function(err,rows){
             if (err) {
                 fn(new Error('User ' + id + ' does not exist'));
 
@@ -66,7 +131,7 @@ module.exports = function(passport) {
 
                 // find a user whose email is the same as the forms email
                 // we are checking to see if the user trying to login already exists
-                connection.query("select * from users where email = '" + email + "'", function(err,rows){
+                client.query("select * from users where email = '" + email + "'", function(err,rows){
 
                     // if there are any errors, return the error
                     if (err) {
@@ -84,7 +149,7 @@ module.exports = function(passport) {
                         newUserMysql.email    = email;
                         newUserMysql.password = generateHash(password);
 
-                        connection.query('INSERT INTO users set ?', newUserMysql , function(err,rows){
+                        client.query('INSERT INTO users set ?', newUserMysql , function(err,rows){
                             console.log("inserted a new user with id: " + rows.insertId);
                             newUserMysql.id = rows.insertId;
                             return done(null, newUserMysql);
@@ -108,7 +173,7 @@ module.exports = function(passport) {
         },
         function(req, email, password, done) { // callback with email and password from our form
 
-            connection.query("select * from users where email = '" + email + "'",function(err,rows){
+            client.query("select * from users where email = '" + email + "'",function(err,rows){
                 // if there are any errors, return the error before anything else
                 if (err) {
 //                    console.log("major error here");
@@ -153,7 +218,7 @@ module.exports = function(passport) {
             process.nextTick(function() {
 
                 // find the user in the database based on their facebook id
-                connection.query("select * from users where fb_id = '" + profile.id + "'",function(err,rows){
+                client.query("select * from users where fb_id = '" + profile.id + "'",function(err,rows){
 
                     // if there is an error, stop everything and return that
                     // ie an error connecting to the database
@@ -174,7 +239,7 @@ module.exports = function(passport) {
                         newUserMysql.fb_name  =  profile.name.givenName + ' ' + profile.name.familyName; // look at the passport user profile to see how names are returned
                         newUserMysql.fb_email =  profile.emails[0].value; // facebook can return multiple emails so we'll take the first
 
-                        connection.query('INSERT INTO users set ?', newUserMysql , function(err,rows){
+                        client.query('INSERT INTO users set ?', newUserMysql , function(err,rows){
 
                             if (err) {
                                 throw err;
