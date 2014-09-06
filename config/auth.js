@@ -8,9 +8,6 @@ module.exports = {
         clientSecret: '466282c16cced1b52b195b4c1a380894',
 //        'callbackURL' 	: 'http://localhost:8080/auth/facebook/callback'
         'callbackURL' 	: 'http://elb-env-zbtykgwvjp.elasticbeanstalk.com/auth/facebook/callback'
-
-
-
     },
 
     'twitterAuth' : {
