@@ -3,7 +3,13 @@
 // set up ======================================================================
 // get all the tools we need
 var express = require('express');
+var path = require('path');
+
 var app = express();
+var server = require('http').Server(app);
+var io = require('socket.io').listen(server);
+
+
 var port = process.env.PORT || 8081;
 var passport = require('passport');
 var flash = require('connect-flash');
@@ -18,6 +24,8 @@ var RedisStore = require('connect-redis')(session);
 var redisHost = '127.0.0.1';
 var redisPort = 6379;
 
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 require('./config/passport')(passport); // pass passport for configuration
 
@@ -35,9 +43,6 @@ app.use(cookieParser()); // read cookies (needed for auth)
 app.use(bodyParser()); // get information from html forms
 
 app.set('view engine', 'ejs'); // set up ejs for templating
-
-// required for passport
-//app.use(session({ secret: 'ilovescotchscotchyscotchscotch' })); // session secret
 
 app.use(session({
     name: 'jsessionid', // access using req.cookies['jsessionid']
@@ -62,5 +67,9 @@ app.use(flash()); // use connect-flash for flash messages stored in session
 require('./app/routes.js')(app, passport); // load our routes and pass in our app and fully configured passport
 
 // launch ======================================================================
-app.listen(port);
-console.log('The magic happens on port ' + port);
+//app.listen(port);
+//console.log('The magic happens on port ' + port);
+
+server.listen(port, function(){
+    console.log('The magic happens on port ' + port);
+});

@@ -11,8 +11,10 @@ var mysql = require('mysql');
 var async = require('async');
 
 
+
 var env = process.env.NODE_ENV || 'development';
 if ('development' == env) {
+//    app.use(express.static(path.join(__dirname, 'public')));
     var client = mysql.createConnection({
         host     : 'localhost',
         user     : 'root',
