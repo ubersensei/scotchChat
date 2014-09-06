@@ -55,12 +55,6 @@ async.series([
             '`fb_name` VARCHAR(140) DEFAULT NULL,' +
             '`fb_email` VARCHAR(140) DEFAULT NULL,' +
             'PRIMARY KEY(ID))', callback);
-
-//        client.query('CREATE TABLE PEOPLE (' +
-//            'ID VARCHAR(40), ' +
-//            'EMAIL VARCHAR(140), ' +
-//            'PASSWORD VARCHAR(140), ' +
-//            'PRIMARY KEY(ID))', callback);
     },
     function insert_default(callback) {
         var person = {

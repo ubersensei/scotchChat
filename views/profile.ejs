@@ -5,12 +5,33 @@
     <title>Node Authentication</title>
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/main.css"/>
+
     <style>
         body 		{ padding-top:80px; word-wrap:break-word; }
     </style>
 </head>
 <body>
+
+
+
 <div class="container">
+
+    <h1>Sockets and Sessions</h1>
+
+    <!--<div id="userName"><span>noOne</span>&nbsp is logged in</div>-->
+    <!--<div id="login">-->
+        <!--<input type="text" id="userNameInput" tabindex = "86"/><button id="userNameButton" tabindex = "89">Login</button>-->
+    <!--</div>-->
+
+    <div id="chat">
+        <input type="text" id="chatInput" tabindex = "96"/><button id="chatButton" tabindex = "99">Post</button>
+
+        <ul id="messages"></ul>
+
+    </div>
+
+
 
     <div class="page-header text-center">
         <h1><span class="fa fa-anchor"></span> Profile Page</h1>
@@ -59,5 +80,11 @@
 
 
 </div>
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/client.js"></script>
+
 </body>
 </html>
