@@ -52,14 +52,9 @@ app.use(session({
 }));
 
 
-app.set('view engine', 'ejs'); // set up ejs for templating
-
-//app.get('/', function(req, res) {
-//    console.log("New session with userName: " + req.session.user + " sessionid: " + req.sessionID + " and jsessionid: " + req.cookies['jsessionid']);
-//    res.render('index.ejs'); // load the index.ejs file
-//});
-
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.set('view engine', 'ejs'); // set up ejs for templating
 
 
 app.use(passport.initialize());
@@ -69,11 +64,6 @@ app.use(flash()); // use connect-flash for flash messages stored in session
 
 // routes ======================================================================
 require('./app/routes.js')(app, passport); // load our routes and pass in our app and fully configured passport
-
-
-//io.on('connection', function (socket) {
-//    console.log('a new socket got connected');
-//});
 
 
 var sub = redis.createClient(redisPort, redisHost);
