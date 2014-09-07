@@ -26,7 +26,7 @@ var redisHost = '127.0.0.1';
 var redisPort = 6379;
 
 
-app.use(express.static(path.join(__dirname, 'public')));
+
 
 require('./config/passport')(passport); // pass passport for configuration
 
@@ -43,8 +43,6 @@ var sessionStore = new RedisStore({client:rClient});
 app.use(cookieParser()); // read cookies (needed for auth)
 app.use(bodyParser()); // get information from html forms
 
-app.set('view engine', 'ejs'); // set up ejs for templating
-
 app.use(session({
     name: 'jsessionid', // access using req.cookies['jsessionid']
     secret: 'secret',
@@ -53,10 +51,15 @@ app.use(session({
     store: sessionStore
 }));
 
-app.get('/', function(req, res) {
-    console.log("New session with userName: " + req.session.user + " sessionid: " + req.sessionID + " and jsessionid: " + req.cookies['jsessionid']);
-    res.render('index.ejs'); // load the index.ejs file
-});
+
+app.set('view engine', 'ejs'); // set up ejs for templating
+
+//app.get('/', function(req, res) {
+//    console.log("New session with userName: " + req.session.user + " sessionid: " + req.sessionID + " and jsessionid: " + req.cookies['jsessionid']);
+//    res.render('index.ejs'); // load the index.ejs file
+//});
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 
 app.use(passport.initialize());
@@ -67,9 +70,11 @@ app.use(flash()); // use connect-flash for flash messages stored in session
 // routes ======================================================================
 require('./app/routes.js')(app, passport); // load our routes and pass in our app and fully configured passport
 
-// launch ======================================================================
-//app.listen(port);
-//console.log('The magic happens on port ' + port);
+
+//io.on('connection', function (socket) {
+//    console.log('a new socket got connected');
+//});
+
 
 var sub = redis.createClient(redisPort, redisHost);
 var pub = redis.createClient(redisPort, redisHost);
@@ -86,7 +91,7 @@ io.on('connection', function (socket) {
     socket.on('chat', function (message) {
         var chatMessage = JSON.parse(message);
         var content = chatMessage.msg;
-        console.log(socket.handshake.session.user + ' pubished a chat message');
+        console.log(socket.handshake.session.user + ' published a chat message');
         var reply = JSON.stringify({category:'chat', user:socket.handshake.session.user, msg: content });
         pub.publish('chat-redis', reply);
     });
@@ -95,9 +100,6 @@ io.on('connection', function (socket) {
 sub.on('message', function (channel, message) {
     io.emit('chat', message);
 });
-
-
-
 
 
 server.listen(port, function(){

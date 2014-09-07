@@ -5,6 +5,7 @@ module.exports = function(app, passport) {
     // HOME PAGE (with login links) ========
     // =====================================
     app.get('/', function(req, res) {
+        console.log("New session with userName: " + req.session.user + " sessionid: " + req.sessionID + " and jsessionid: " + req.cookies['jsessionid']);
         res.render('index.ejs'); // load the index.ejs file
     });
 
