@@ -26,8 +26,6 @@ var redisHost = '127.0.0.1';
 var redisPort = 6379;
 
 
-
-
 require('./config/passport')(passport); // pass passport for configuration
 
 // set up our express application
@@ -74,7 +72,8 @@ io.use(socketHandshake({store: sessionStore, key:'jsessionid', secret:'secret', 
 io.on('connection', function (socket) {
     console.log('a new socket got connected');
     socket.on('join', function () {
-        console.log(socket.handshake.session.user + ' joined');
+//        console.log(socket.handshake.session.user + ' joined');
+        console.log(req.session.passport.user.name + ' joined');
         var reply = JSON.stringify({category:'join', user:socket.handshake.session.user, msg:' joined the channel' });
         pub.publish('chat-redis', reply);
     });
