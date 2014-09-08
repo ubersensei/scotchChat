@@ -1,0 +1,6 @@
+Test whether the jsessionid is being set - may need to take care of the ordering of the middlewares
+check upon userlogout, does the jessionid still remain valid ? Also, need to test load balancing with round-robin
+
+- Error "failed to deserialize user out of session" crept up; probably due to trying to signup again (with really logging out ?) ... or something like that. Deleting cookie from the browser (Option+Cmd+I > Resources > Cookies)
+
+

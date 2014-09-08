@@ -7,7 +7,7 @@ var path = require('path');
 
 var app = express();
 var server = require('http').Server(app);
-
+var io = require('socket.io').listen(server);
 
 
 var port = process.env.PORT || 8081;
@@ -20,9 +20,12 @@ var bodyParser = require('body-parser');
 var session = require('express-session');
 var redis = require("redis");
 var RedisStore = require('connect-redis')(session);
+var socketHandshake = require('socket.io-handshake')
 
 var redisHost = '127.0.0.1';
 var redisPort = 6379;
+
+
 
 
 require('./config/passport')(passport); // pass passport for configuration
@@ -40,21 +43,23 @@ var sessionStore = new RedisStore({client:rClient});
 app.use(cookieParser()); // read cookies (needed for auth)
 app.use(bodyParser()); // get information from html forms
 
-var sessionMiddleware = session({
+app.use(session({
     name: 'jsessionid', // access using req.cookies['jsessionid']
     secret: 'secret',
     saveUninitialized: true, // avoids warning
     resave: true, // avoids warning
     store: sessionStore
-});
+}));
 
-
-app.use(sessionMiddleware);
-
-
-app.use(express.static(path.join(__dirname, 'public')));
 
 app.set('view engine', 'ejs'); // set up ejs for templating
+
+//app.get('/', function(req, res) {
+//    console.log("New session with userName: " + req.session.user + " sessionid: " + req.sessionID + " and jsessionid: " + req.cookies['jsessionid']);
+//    res.render('index.ejs'); // load the index.ejs file
+//});
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 
 app.use(passport.initialize());
@@ -66,74 +71,35 @@ app.use(flash()); // use connect-flash for flash messages stored in session
 require('./app/routes.js')(app, passport); // load our routes and pass in our app and fully configured passport
 
 
+//io.on('connection', function (socket) {
+//    console.log('a new socket got connected');
+//});
+
+
 var sub = redis.createClient(redisPort, redisHost);
 var pub = redis.createClient(redisPort, redisHost);
 sub.subscribe('chat-redis');
 
-
-var io = require('socket.io').listen(server);
-
-io.use(function(socket,next){
-    sessionMiddleware(socket.request, {}, next);
-});
-
-
-
-//io.use(socketHandshake({store: sessionStore, key:'jsessionid', secret:'secret', parser:cookieParser()}));
-
+io.use(socketHandshake({store: sessionStore, key:'jsessionid', secret:'secret', parser:cookieParser()}));
 io.on('connection', function (socket) {
-
-    var userId = socket.request.session.passport.user;
-
     console.log('a new socket got connected');
-    console.log("Your User ID is", userId);
-
     socket.on('join', function () {
-        console.log('userId: ' + userId + ' joined');
-        var reply = JSON.stringify({category:'join', user:userId, msg:' joined the channel' });
+        console.log(socket.handshake.session.user + ' joined');
+        var reply = JSON.stringify({category:'join', user:socket.handshake.session.user, msg:' joined the channel' });
         pub.publish('chat-redis', reply);
     });
     socket.on('chat', function (message) {
         var chatMessage = JSON.parse(message);
         var content = chatMessage.msg;
-        console.log('userId: ' + userId + ' published a chat message');
-        var reply = JSON.stringify({category:'chat', user:userId, msg: content });
+        console.log(socket.handshake.session.user + ' published a chat message');
+        var reply = JSON.stringify({category:'chat', user:socket.handshake.session.user, msg: content });
         pub.publish('chat-redis', reply);
     });
-
 });
 
 sub.on('message', function (channel, message) {
     io.emit('chat', message);
 });
-
-
-
-
-
-
-
-//io.use(socketHandshake({store: sessionStore, key:'jsessionid', secret:'secret', parser:cookieParser()}));
-//io.on('connection', function (socket) {
-//    console.log('a new socket got connected');
-//    socket.on('join', function () {
-//        console.log(socket.handshake.session.user + ' joined');
-//        console.log( ' typeof(socket.handshake.user) ' + typeof(socket.handshake.user));
-//        var reply = JSON.stringify({category:'join', user:socket.handshake.session.user, msg:' joined the channel' });
-//        pub.publish('chat-redis', reply);
-//    });
-//    socket.on('chat', function (message) {
-//        var chatMessage = JSON.parse(message);
-//        var content = chatMessage.msg;
-//        console.log(socket.handshake.session.user + ' published a chat message');
-//        var reply = JSON.stringify({category:'chat', user:socket.handshake.session.user, msg: content });
-//        pub.publish('chat-redis', reply);
-//    });
-//});
-//
-//sub.on('message', function (channel, message) {
-//    io.emit('chat', message);
-//});
 
 
 server.listen(port, function(){
