@@ -3,4 +3,4 @@ check upon userlogout, does the jessionid still remain valid ? Also, need to tes
 
 - Error "failed to deserialize user out of session" crept up; probably due to trying to signup again (with really logging out ?) ... or something like that. Deleting cookie from the browser (Option+Cmd+I > Resources > Cookies)
 
-
+- Regenerate session stuff is a bit shaky. It regenerates a new session, re-uses the user information ... so long as the browser is not refreshed. If browser is refreshed, then everything starts afresh, including login

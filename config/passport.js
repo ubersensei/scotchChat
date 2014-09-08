@@ -34,14 +34,14 @@ async.series([
     function connect(callback) {
         client.connect(callback);
     },
-    function clear(callback) {
-        client.query('DROP DATABASE IF EXISTS rum', callback);
-    },
+//    function clear(callback) {
+//        client.query('DROP DATABASE IF EXISTS rum', callback);
+//    },
     function create_db(callback) {
-        client.query('CREATE DATABASE rum', callback);
+        client.query('CREATE DATABASE IF NOT EXISTS vodka', callback);
     },
     function use_db(callback) {
-        client.query('USE rum', callback);
+        client.query('USE vodka', callback);
     },
     function create_table(callback) {
 

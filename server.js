@@ -108,34 +108,6 @@ sub.on('message', function (channel, message) {
 });
 
 
-
-
-
-
-
-//io.use(socketHandshake({store: sessionStore, key:'jsessionid', secret:'secret', parser:cookieParser()}));
-//io.on('connection', function (socket) {
-//    console.log('a new socket got connected');
-//    socket.on('join', function () {
-//        console.log(socket.handshake.session.user + ' joined');
-//        console.log( ' typeof(socket.handshake.user) ' + typeof(socket.handshake.user));
-//        var reply = JSON.stringify({category:'join', user:socket.handshake.session.user, msg:' joined the channel' });
-//        pub.publish('chat-redis', reply);
-//    });
-//    socket.on('chat', function (message) {
-//        var chatMessage = JSON.parse(message);
-//        var content = chatMessage.msg;
-//        console.log(socket.handshake.session.user + ' published a chat message');
-//        var reply = JSON.stringify({category:'chat', user:socket.handshake.session.user, msg: content });
-//        pub.publish('chat-redis', reply);
-//    });
-//});
-//
-//sub.on('message', function (channel, message) {
-//    io.emit('chat', message);
-//});
-
-
 server.listen(port, function(){
     console.log('The magic happens on port ' + port);
 });

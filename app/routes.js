@@ -5,9 +5,43 @@ module.exports = function(app, passport) {
     // HOME PAGE (with login links) ========
     // =====================================
     app.get('/', function(req, res) {
-        console.log("New session with userName: " + req.session.user + " sessionid: " + req.sessionID + " and jsessionid: " + req.cookies['jsessionid']);
-        res.render('index.ejs'); // load the index.ejs file
+        console.log(" New sessionid: " + req.sessionID + " and jsessionid: " + req.cookies['jsessionid']);
+
+        // We do this addition check in case the server restarts
+        // and if the browser is not closed, then if the user is loggedin
+        // then you'd want to show the profile page
+        if (req.isAuthenticated()) {
+            res.redirect('/profile');
+        } else {
+            res.render('index.ejs'); // load the index.ejs file
+        }
     });
+
+
+
+    app.get('/regenerateSession', function(req, res) {
+
+        var temp_user = req.user;
+
+        //Regenerate new session & store user from previous session (if it exists)
+        req.session.regenerate(function (err) {
+            req.user = temp_user;
+            console.log(" Regenerated sessionid: " + req.sessionID + " and jsessionid: " + req.cookies['jsessionid']);
+            // We do this addition check in case the server restarts
+            // and if the browser is not closed, then if the user is loggedin
+            // then you'd want to show the profile page
+            if (req.isAuthenticated()) {
+                res.redirect('/profile');
+            } else {
+                res.render('index.ejs'); // load the index.ejs file
+            }
+        });
+
+    });
+
+
+
+
 
     // =====================================
     // LOGIN ===============================
