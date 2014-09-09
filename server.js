@@ -24,11 +24,13 @@ var RedisStore = require('connect-redis')(session);
 var redisHost = '127.0.0.1';
 var redisPort = 6379;
 
+// set up our express application
+app.use(morgan('dev')); // log every request to the console
+
 
 require('./config/passport')(passport); // pass passport for configuration
 
-// set up our express application
-app.use(morgan('dev')); // log every request to the console
+
 
 
 /*
@@ -81,6 +83,9 @@ app.get('/', function(req, res) {
     // and if the browser is not closed, then if the user is loggedin
     // then you'd want to show the profile page
     if (req.isAuthenticated()) {
+
+        console.log('whats in the session: req.session.passport.user >> ' + req.session.passport.user);
+
         res.redirect('/profile');
     } else {
         res.render('index.ejs'); // load the index.ejs file
@@ -105,15 +110,6 @@ app.get('/regenerateSession', function(req, res) {
 
         console.log('temp.user.id' + temp_user.id);
 
-        passport.serializeUser(function(temp_user, done) {
-            done(null, temp_user.id);
-        });
-
-
-        io.use(function(socket,next){
-            sessionMiddleware(socket.request, {}, next);
-        });
-
         // We do this addition check in case the server restarts
         // and if the browser is not closed, then if the user is loggedin
         // then you'd want to show the profile page
@@ -127,8 +123,43 @@ app.get('/regenerateSession', function(req, res) {
 });
 
 
+app.post('/regenSess', function(req, res, next) {
+
+//    req.body.email = req.user.email;
+//    req.body.password = req.user.password;
+
+//    var user = req.user;
+//
+//    req.session.regenerate(function (err) {
+//
+//        if (err) {
+//            console.log ("could not regenerate new session");
+//        } else {
+//
+//            console.log("before passport.authenticate");
+//            passport.authenticate('local-signup', function(err, user, info) {
+//                if (err) {
+//                    console.log("inside passport.authenticate");
+//                    return next(err)
+//                }
+//                if (!user) {
+//                    console.log("did not find user");
+//                    req.flash('error', info.message);
+//                    return res.redirect('/login')
+//                }
+//                req.logIn(user, function(err) {
+//                    if (err) { return next(err); }
+//                    console.log("relogin was a grand success");
+//                    //            return res.redirect('/profile'); // can send js payload too
+//                });
+//            })(req, res, next);
+//
+//        }
+//    });
 
 
+
+});
 
 
 

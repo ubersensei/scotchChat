@@ -53,10 +53,6 @@ module.exports = function(app, passport) {
     });
 
 
-    /**
-     * Upon successful login, start socket.io
-     */
-
     app.post('/login', function(req, res, next) {
         passport.authenticate('local-login', function(err, user, info) {
             if (err) { return next(err) }
@@ -66,7 +62,6 @@ module.exports = function(app, passport) {
             }
             req.logIn(user, function(err) {
                 if (err) { return next(err); }
-                // upon successful login, start socket.io
                 return res.redirect('/profile'); // can send js payload too
             });
         })(req, res, next);
@@ -84,20 +79,16 @@ module.exports = function(app, passport) {
 
 
 
-    /**
-     * Upon successful signup, start socket.io
-     */
-
     app.post('/signup', function(req, res, next) {
+
         passport.authenticate('local-signup', function(err, user, info) {
             if (err) { return next(err) }
             if (!user) {
                 req.flash('error', info.message);
-                return res.redirect('/login')
+                return res.redirect('/signup')
             }
             req.logIn(user, function(err) {
                 if (err) { return next(err); }
-                // upon successful login, start socket.io
                 return res.redirect('/profile'); // can send js payload too
             });
         })(req, res, next);

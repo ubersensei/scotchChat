@@ -2,7 +2,7 @@ $(document).ready(function () {
 
 //    var socket; // a global variable.
 
-    var socket = io('http://localhost:8081/', {reconnection: false});
+    var socket = io('http://localhost:8081/', {reconnection: false, forceNew: true});
     var intervalID;
     var reconnectCount = 0;
 
@@ -50,7 +50,13 @@ $(document).ready(function () {
             clearInterval(intervalID);
         }
         console.log('Making a dummy http call to set jsessionid (before we do socket.io reconnect)');
-        $.ajax('/regenerateSession')
+//        $.ajax('/regenerateSession')
+        $.ajax({
+            type: "POST",
+//            url: "/regenerateSession"
+            url: "/regenSess"
+        })
+
             .done(function () {
                 console.log("http request succeeded");
                 //reconnect the socket AFTER we receive jsessionid set
