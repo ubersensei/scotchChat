@@ -54,7 +54,8 @@ $(document).ready(function () {
         $.ajax({
             type: "POST",
 //            url: "/regenerateSession"
-            url: "/regenSess"
+            url: "/regenSess",
+            data: { email: "lev", password: "tolstoy" }
         })
 
             .done(function () {

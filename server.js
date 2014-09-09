@@ -93,41 +93,41 @@ app.get('/', function(req, res) {
 });
 
 
-app.get('/regenerateSession', function(req, res) {
+//app.get('/regenerateSession', function(req, res) {
+//
+//
+//    var temp_user = req.user;
+//
+//    //Regenerate new session & store user from previous session (if it exists)
+//    req.session.regenerate(function (err) {
+//
+//        if (err) {
+//            console.log ("could not regenerate new session");
+//        }
+//
+//        req.user = temp_user;
+//        console.log(" Regenerated sessionid: " + req.sessionID + " and jsessionid: " + req.cookies['jsessionid']);
+//
+//        console.log('temp.user.id' + temp_user.id);
+//
+//        // We do this addition check in case the server restarts
+//        // and if the browser is not closed, then if the user is loggedin
+//        // then you'd want to show the profile page
+//        if (req.isAuthenticated()) {
+//            res.redirect('/profile');
+//        } else {
+//            res.render('index.ejs'); // load the index.ejs file
+//        }
+//    });
+//
+//});
 
 
-    var temp_user = req.user;
-
-    //Regenerate new session & store user from previous session (if it exists)
-    req.session.regenerate(function (err) {
-
-        if (err) {
-            console.log ("could not regenerate new session");
-        }
-
-        req.user = temp_user;
-        console.log(" Regenerated sessionid: " + req.sessionID + " and jsessionid: " + req.cookies['jsessionid']);
-
-        console.log('temp.user.id' + temp_user.id);
-
-        // We do this addition check in case the server restarts
-        // and if the browser is not closed, then if the user is loggedin
-        // then you'd want to show the profile page
-        if (req.isAuthenticated()) {
-            res.redirect('/profile');
-        } else {
-            res.render('index.ejs'); // load the index.ejs file
-        }
-    });
-
-});
-
-
-app.post('/regenSess', function(req, res, next) {
-
+//app.post('/regenSess', function(req, res, next) {
+//
 //    req.body.email = req.user.email;
 //    req.body.password = req.user.password;
-
+//
 //    var user = req.user;
 //
 //    req.session.regenerate(function (err) {
@@ -137,7 +137,7 @@ app.post('/regenSess', function(req, res, next) {
 //        } else {
 //
 //            console.log("before passport.authenticate");
-//            passport.authenticate('local-signup', function(err, user, info) {
+//            passport.authenticate('local-login', function(err, user, info) {
 //                if (err) {
 //                    console.log("inside passport.authenticate");
 //                    return next(err)
@@ -156,6 +156,60 @@ app.post('/regenSess', function(req, res, next) {
 //
 //        }
 //    });
+//
+//});
+
+
+
+app.post('/regenSess', function(req, res, next) {
+
+
+//    req.session.regenerate(function (err) {
+//
+//        if (err) {
+//            console.log ("could not regenerate new session");
+//        } else {
+//            passport.authenticate('local-login', function(err, user, info) {
+//                if (err) { return next(err) }
+//                if (!user) {
+//                    req.flash('error', info.message);
+//                    return res.redirect('/login')
+//                }
+//                req.logIn(user, function(err) {
+//                    console.log(user);
+//                    if (err) { return next(err); }
+//                    // console.log('now logged in with req.session.passport.user: ' + req.session.passport.user);
+//                    return res.redirect('/profile'); // can send js payload too
+//                });
+//            })(req, res, next);
+//        }
+//    });
+
+
+
+
+
+
+    req.session.regenerate(function(err) {
+        // will have a new session here
+        req.body.email = "lev";
+        req.body.password = "tolstoy";
+    });
+
+
+    passport.authenticate('local-login', function(err, user, info) {
+
+        if (err) { return next(err) }
+        if (!user) {
+            req.flash('error', info.message);
+            return res.redirect('/login')
+        }
+        req.logIn(user, function(err) {
+            if (err) { return next(err); }
+//            console.log('now logged in with req.session.passport.user: ' + req.session.passport.user);
+            return res.redirect('/profile'); // can send js payload too
+        });
+    })(req, res, next);
 
 
 

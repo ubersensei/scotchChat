@@ -167,10 +167,13 @@ module.exports = function(passport) {
         },
         function(req, email, password, done) { // callback with email and password from our form
 
+
+            console.log('within local-login LocalStrategy: email: ' + email );
+
             client.query("select * from users where email = '" + email + "'",function(err,rows){
+
                 // if there are any errors, return the error before anything else
                 if (err) {
-//                    console.log("major error here");
                     return done(err);
                 }
 
@@ -184,6 +187,7 @@ module.exports = function(passport) {
                     return done(null, false, req.flash('loginMessage', 'Oops! Wrong password.')); // create the loginMessage and save it to session as flashdata
                 }
 
+//                console.log(rows[0]);
                 // all is well, return successful user
                 return done(null, rows[0]);
 
