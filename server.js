@@ -62,10 +62,6 @@ app.use(passport.session()); // persistent login sessions
 app.use(flash()); // use connect-flash for flash messages stored in session
 
 
-// routes ======================================================================
-require('./app/routes.js')(app, passport); // load our routes and pass in our app and fully configured passport
-
-
 var sub = redis.createClient(redisPort, redisHost);
 var pub = redis.createClient(redisPort, redisHost);
 sub.subscribe('chat-redis');
@@ -73,13 +69,73 @@ sub.subscribe('chat-redis');
 
 var io = require('socket.io').listen(server);
 
-io.use(function(socket,next){
-    sessionMiddleware(socket.request, {}, next);
+
+// routes ======================================================================
+require('./app/routes.js')(app, passport); // load our routes and pass in our app and fully configured passport
+
+
+app.get('/', function(req, res) {
+    console.log(" New sessionid: " + req.sessionID + " and jsessionid: " + req.cookies['jsessionid']);
+
+    // We do this addition check in case the server restarts
+    // and if the browser is not closed, then if the user is loggedin
+    // then you'd want to show the profile page
+    if (req.isAuthenticated()) {
+        res.redirect('/profile');
+    } else {
+        res.render('index.ejs'); // load the index.ejs file
+    }
+});
+
+
+app.get('/regenerateSession', function(req, res) {
+
+
+    var temp_user = req.user;
+
+    //Regenerate new session & store user from previous session (if it exists)
+    req.session.regenerate(function (err) {
+
+        if (err) {
+            console.log ("could not regenerate new session");
+        }
+
+        req.user = temp_user;
+        console.log(" Regenerated sessionid: " + req.sessionID + " and jsessionid: " + req.cookies['jsessionid']);
+
+        console.log('temp.user.id' + temp_user.id);
+
+        passport.serializeUser(function(temp_user, done) {
+            done(null, temp_user.id);
+        });
+
+
+        io.use(function(socket,next){
+            sessionMiddleware(socket.request, {}, next);
+        });
+
+        // We do this addition check in case the server restarts
+        // and if the browser is not closed, then if the user is loggedin
+        // then you'd want to show the profile page
+        if (req.isAuthenticated()) {
+            res.redirect('/profile');
+        } else {
+            res.render('index.ejs'); // load the index.ejs file
+        }
+    });
+
 });
 
 
 
-//io.use(socketHandshake({store: sessionStore, key:'jsessionid', secret:'secret', parser:cookieParser()}));
+
+
+
+
+io.use(function(socket,next){
+    sessionMiddleware(socket.request, {}, next);
+});
+
 
 io.on('connection', function (socket) {
 
@@ -106,6 +162,40 @@ io.on('connection', function (socket) {
 sub.on('message', function (channel, message) {
     io.emit('chat', message);
 });
+
+
+
+
+//io.use(function(socket,next){
+//    sessionMiddleware(socket.request, {}, next);
+//});
+//
+//
+//io.on('connection', function (socket, req) {
+//
+//    var userId = socket.request.session.passport.user;
+//
+//    console.log('a new socket got connected');
+//    console.log("Your User ID is", userId);
+//
+//    socket.on('join', function () {
+//        console.log('userId: ' + userId + ' joined');
+//        var reply = JSON.stringify({category:'join', user:userId, msg:' joined the channel' });
+//        pub.publish('chat-redis', reply);
+//    });
+//    socket.on('chat', function (message) {
+//        var chatMessage = JSON.parse(message);
+//        var content = chatMessage.msg;
+//        console.log('userId: ' + userId + ' published a chat message');
+//        var reply = JSON.stringify({category:'chat', user:userId, msg: content });
+//        pub.publish('chat-redis', reply);
+//    });
+//
+//});
+//
+//sub.on('message', function (channel, message) {
+//    io.emit('chat', message);
+//});
 
 
 server.listen(port, function(){

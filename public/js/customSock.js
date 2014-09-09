@@ -53,7 +53,7 @@ $(document).ready(function () {
         $.ajax('/regenerateSession')
             .done(function () {
                 console.log("http request succeeded");
-                //reconnect the socket AFTER we got jsessionid set
+                //reconnect the socket AFTER we receive jsessionid set
                 socket.io.reconnect();
                 //                            socket.reconnect();
                 clearInterval(intervalID);

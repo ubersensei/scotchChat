@@ -55,12 +55,12 @@ async.series([
             '`fb_email` VARCHAR(140) DEFAULT NULL,' +
             'PRIMARY KEY(ID))', callback);
     },
-    function insert_default(callback) {
-        var person = {
-            EMAIL: 'neophyte-1234@gmail.com',
-            PASSWORD: 'neo'};
-        client.query('INSERT INTO users set ?', person, callback);
-    }
+//    function insert_default(callback) {
+//        var person = {
+//            EMAIL: 'neophyte-1234@gmail.com',
+//            PASSWORD: 'neo'};
+//        client.query('INSERT INTO users set ?', person, callback);
+//    }
 ], function (err, results) {
     if (err) {
         console.log('Exception initializing database.');
@@ -70,10 +70,6 @@ async.series([
         //        init();
     }
 });
-
-
-
-//client.query('USE scotch'); // scotch is the name of the database
 
 
 // define the function directly
